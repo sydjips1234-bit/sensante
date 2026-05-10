@@ -36,7 +36,7 @@ class DiagnosticOutput(BaseModel):
 app = FastAPI(
     title="SenSante API",
     description="Assistant pre-diagnostic medical pour le Senegal",
-    version="0.2.0"
+    version="0.3.0"
 )
 
 
@@ -63,6 +63,21 @@ def health_check():
     return {
         "status": "ok",
         "message": "SenSante API is running"
+    }
+
+
+# ----------------------------
+# Exercice 1 - Model Info
+# ----------------------------
+
+@app.get("/model-info")
+def model_info():
+
+    return {
+        "type_modele": type(model).__name__,
+        "nombre_arbres": len(model.estimators_),
+        "classes": list(model.classes_),
+        "nombre_features": len(feature_cols)
     }
 
 
@@ -110,6 +125,7 @@ def predict(patient: PatientInput):
     # Prediction
     diagnostic = model.predict(features)[0]
 
+    # Probabilites
     probas = model.predict_proba(features)[0]
     proba_max = float(probas.max())
 
