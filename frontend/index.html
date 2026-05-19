@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SenSante</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>SenSante</h1>
+
+        <p>Assistant pré-diagnostic médical</p>
+
+        <form id="diagnosticForm">
+
+            <label>Âge :</label>
+            <input type="number" id="age" required>
+
+            <label>Sexe :</label>
+            <select id="sexe">
+                <option value="M">Homme</option>
+                <option value="F">Femme</option>
+            </select>
+
+            <label>Température :</label>
+            <input type="number" step="0.1" id="temperature" required>
+
+            <label>Tension systolique :</label>
+            <input type="number" id="tension" required>
+
+            <label>Région :</label>
+            <input type="text" id="region" required>
+
+            <div class="checkboxes">
+
+                <label>
+                    <input type="checkbox" id="toux">
+                    Toux
+                </label>
+
+                <label>
+                    <input type="checkbox" id="fatigue">
+                    Fatigue
+                </label>
+
+                <label>
+                    <input type="checkbox" id="maux_tete">
+                    Maux de tête
+                </label>
+
+            </div>
+
+            <button type="submit">
+                Obtenir le diagnostic
+            </button>
+
+        </form>
+
+        <div id="resultat"></div>
+
+        <div id="historique"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
