@@ -2,9 +2,19 @@
 # Lab 3 - Integration de Modeles IA - ESP / UCAD
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import joblib
 import numpy as np
+from groq import Groq
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+groq_api_key = os.getenv("GROQ_API_KEY")
+client = Groq(api_key=groq_api_key)
 
 
 # ----------------------------
@@ -28,6 +38,10 @@ class DiagnosticOutput(BaseModel):
     confiance: str
     message: str
 
+class ExplainInput(BaseModel):
+    diagnostic: str
+    probabilite: float
+    confiance: str
 
 # ----------------------------
 # Application FastAPI
@@ -37,6 +51,18 @@ app = FastAPI(
     title="SenSante API",
     description="Assistant pre-diagnostic medical pour le Senegal",
     version="0.3.0"
+)
+
+groq_api_key = os.getenv("GROQ_API_KEY")
+
+client = Groq(api_key=groq_api_key)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -145,10 +171,82 @@ def predict(patient: PatientInput):
         "sain": "Pas de pathologie detectee. Continuez a surveiller."
     }
 
-    # Retour resultat
+    # Génération du conseil IA
+    conseil_ia = generer_conseil_ia(
+        diagnostic,
+        confiance
+)
+
     return DiagnosticOutput(
         diagnostic=diagnostic,
         probabilite=round(proba_max, 2),
         confiance=confiance,
-        message=messages.get(diagnostic, "Consultez un medecin.")
+        message=conseil_ia
+)
+
+@app.post("/explain")
+def explain(data: ExplainInput):
+
+    prompt = f"""
+    Tu es un assistant médical sénégalais bienveillant.
+
+    Explique simplement ce diagnostic à un patient.
+
+    Diagnostic : {data.diagnostic}
+    Probabilité : {data.probabilite}
+    Niveau de confiance : {data.confiance}
+
+    Donne :
+    - une explication simple
+    - les symptômes possibles
+    - des conseils pratiques
+    - quand consulter un médecin
+
+    Réponse courte, claire et rassurante.
+    """
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.5,
+        max_tokens=250
     )
+
+    return {
+        "explication": response.choices[0].message.content
+    }
+
+    try:
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Tu es un assistant médical sénégalais."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.5,
+            max_tokens=200
+        )
+
+        explication = response.choices[0].message.content
+
+        return {
+            "explication": explication
+        }
+
+    except Exception as e:
+
+        return {
+            "explication": "Explication non disponible."
+        }

@@ -90,7 +90,7 @@ function afficherHistorique() {
         <table>
 
             <tr>
-                <th>Nom</th>
+                <th>Age</th>
                 <th>Diagnostic</th>
                 <th>Probabilité</th>
             </tr>
@@ -100,7 +100,7 @@ function afficherHistorique() {
 
         historiqueHTML += `
             <tr>
-                <td>${item.nom}</td>
+                <td>${item.age}</td>
                 <td>${item.diagnostic}</td>
                 <td>${item.probabilite}</td>
             </tr>
